@@ -4,28 +4,34 @@ from pygame.locals import *
 
 pygame.init()
 
+
+
 # Configurações da tela
 screen_width = 600
-screen_height = 600
+screen_height = 800
 screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption('Breakout')
 
 # Cores
-bg = (234, 218, 184)
+bg = (0, 0, 0)
 block_red = (242, 85, 96)
+block_orange = (255, 135, 0)
 block_green = (86, 174, 87)
-block_blue = (69, 177, 232)
+block_yellow = (255, 255, 94)
 paddle_col = (142, 135, 123)
 paddle_outline = (100, 100, 100)
 text_col = (78, 81, 139)
 
+
+
 # Variáveis do jogo
-cols = 6
-rows = 6
+cols = 10
+rows = 12
 clock = pygame.time.Clock()
 fps = 60
 live_ball = False
 game_over = 0
+ball_speed_increase = 0.02
 
 # Configuração da fonte
 font = pygame.font.SysFont('Constantia', 30)
@@ -36,8 +42,10 @@ def draw_text(text, font, text_col, x, y):
     screen.blit(img, (x, y))
 
 # Criação da parede
+strength = 0
+block_col = 0
 width = screen_width // cols
-height = 50
+height = 25
 blocks = []
 for row in range(rows):
     block_row = []
@@ -46,11 +54,13 @@ for row in range(rows):
         block_y = row * height
         rect = pygame.Rect(block_x, block_y, width, height)
 
-        if row < 2:
-            strength = 3
-        elif row < 4:
-            strength = 2
+        if row < 3:
+            strength = 4
         elif row < 6:
+            strength = 3
+        elif row < 9:
+            strength = 2
+        elif row < 12:
             strength = 1
 
         block_individual = [rect, strength]
@@ -84,12 +94,15 @@ while run:
     # Desenho da parede
     for row in blocks:
         for block in row:
-            if block[1] == 3:
-                block_col = block_blue
+
+            if block[1] == 4:
+                block_col = block_red
+            elif block[1] == 3:
+                block_col = block_orange
             elif block[1] == 2:
                 block_col = block_green
             elif block[1] == 1:
-                block_col = block_red
+                block_col = block_yellow
             pygame.draw.rect(screen, block_col, block[0])
             pygame.draw.rect(screen, bg, block[0], 2)
 
@@ -124,9 +137,21 @@ while run:
 
                 if block[1] > 1:
                     block[1] -= 1
+                    # Aumento da velocidade da bola progressivamente
+                    if block[1] == 4:
+                        ball_speed_x *= (1 + 0.08)
+                        ball_speed_y *= (1 + 0.08)
+                    elif block[1] == 3:
+                        ball_speed_x *= (1 + 0.06)
+                        ball_speed_y *= (1 + 0.06)
+                    elif block[1] == 2:
+                        ball_speed_x *= (1 + 0.04)
+                        ball_speed_y *= (1 + 0.04)
+                    elif block[1] == 1:
+                        ball_speed_x *= (1 + 0.02)
+                        ball_speed_y *= (1 + 0.02)
                 else:
                     block[0] = (0, 0, 0, 0)
-
     # Verifica colisão com as paredes
     if ball_rect.left < 0 or ball_rect.right > screen_width:
         ball_speed_x *= -1
