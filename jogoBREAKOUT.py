@@ -23,6 +23,7 @@ block_yellow = (255, 255, 94)
 paddle_col = (142, 135, 123)
 paddle_outline = (100, 100, 100)
 text_col = (78, 81, 139)
+color_white = (255, 255, 255)
 
 
 
@@ -37,9 +38,13 @@ ball_speed_increase = 0.02
 ball_speed = 5
 ball_speed_x2 = 0
 ball_speed_y2 = 0
+lives = 3
+ball_moving = True
+start_ticks = 0
 
 # Configuração da fonte
 font = pygame.font.SysFont('Constantia', 30)
+font2 = pygame.font.SysFont('couriernew', 60)
 
 # Função para desenhar texto
 def draw_text(text, font, text_col, x, y):
@@ -158,7 +163,7 @@ while run:
                 else:
                     block[0] = (0, 0, 0, 0)
     # Verifica colisão com as paredes
-    if ball_rect.left < 0 or ball_rect.right > screen_width:
+    if ball_rect.left < 0 or ball_rect.right > 600:
         ball_speed_x *= -1
 
     # Verifica colisão com o topo
@@ -167,33 +172,50 @@ while run:
 
     # Verifica se a bola atingiu o fundo
     if ball_rect.bottom > screen_height:
-        game_over = -1
+        lives -= 1
+        #Reposiciona a bola
+        if lives > 0:
+            ball_x = paddle_x + (paddle_width // 2) - ball_rad
+            ball_y = paddle_y - paddle_height - 2 * ball_rad
+            ball_rect = Rect(ball_x, ball_y, ball_rad * 2, ball_rad * 2)
+            #Direção aleatória pra cima
+            ball_speed_x = 4* (randint(0,1) * 2 - 1)
+            ball_speed_y = -4
+            ball_moving = False
+            start_ticks = pygame.time.get_ticks()
+        else:
+            game_over = -1
+            draw_text('GAME OVER', font2, color_white, 129, 400)
 
     # Movimento da bola
-    ball_rect.x += ball_speed_x
-    ball_rect.y += ball_speed_y
+    if ball_moving:
+        ball_rect.x += ball_speed_x
+        ball_rect.y += ball_speed_y
+    else:
+        seconds = (pygame.time.get_ticks() - start_ticks) /1000
+        if seconds > 0.6:
+            ball_moving = True
 
     # Verifica a colisão com a raquete
     if ball_rect.colliderect(paddle_rect) and ball_speed_y > 0:
         ball_speed_y *= -1
 
-        # Controle de angulagem do rebote
-        relative_position = (ball_rect.x + ball_rad - paddle_rect.x - paddle_width / 2) / (paddle_width / 2)
-        max_angle = 60
-        angle = relative_position * max_angle
+        # Adiciona um pequeno valor aleatório à velocidade x ou y
+        if randint(0, 1) == 0:
+            ball_speed_x += 0.1 * (randint(0, 1) * 2 - 1)
+        else:
+            ball_speed_y += 0.1 * (randint(0, 1) * 2 - 1)
 
-        # Ajuste nas velocidades
-        ball_speed_x2 = ball_speed_max * math.sin(math.radians(angle))
-        ball_speed_y2 = -ball_speed_max * math.cos(math.radians(angle))
-
-        # Ajuste na velocidade total
+        # Garante que a velocidade total vda bola permanece a mesma
         total_speed = math.sqrt(ball_speed_x ** 2 + ball_speed_y ** 2)
-        ball_speed_x2 *= total_speed / ball_speed_max
-        ball_speed_y2 *= total_speed / ball_speed_max
+        ball_speed_x = ball_speed_x * ball_speed / total_speed
+        ball_speed_y = ball_speed_y * ball_speed / total_speed
 
-        # Aplica as velocidades
-        ball_rect.x += ball_speed_x2
-        ball_rect.y += ball_speed_y2
+        # Limita a velocidade máxima da bola
+        if ball_speed_x > ball_speed_max:
+            ball_speed_x = ball_speed_max
+        if ball_speed_y > ball_speed_max:
+            ball_speed_y = ball_speed_max
 
     pygame.display.update()
 
