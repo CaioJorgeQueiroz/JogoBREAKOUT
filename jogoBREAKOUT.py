@@ -1,7 +1,6 @@
 import pygame
 from pygame.locals import *
 from random import randint
-import math
 
 pygame.init()
 
@@ -21,6 +20,9 @@ paddle_col = (142, 135, 123)
 paddle_outline = (100, 100, 100)
 text_col = (78, 81, 139)
 color_white = (255, 255, 255)
+
+# Som da bola
+bounce_sound = pygame.mixer.Sound("assets/bounce.wav")
 
 # Variáveis do jogo
 cols = 10
@@ -196,13 +198,17 @@ while run:
                     ball_speed_x = ball_speed_x * (1 + (speed_level - 1) * 0.05)
                     ball_speed_y = ball_speed_y * (1 + (speed_level - 1) * 0.05)
 
+                bounce_sound.play()
+
     # Verifica colisão com as paredes
     if ball_rect.left < 0 or ball_rect.right > screen_width:
         ball_speed_x *= -1
+        bounce_sound.play()
 
     # Verifica colisão com o topo
     if ball_rect.top < 0:
         ball_speed_y *= -1
+        bounce_sound.play()
 
     # Verifica se a bola atingiu o fundo
     if ball_rect.bottom > screen_height:
@@ -237,6 +243,7 @@ while run:
     if ball_rect.colliderect(paddle_rect) and ball_speed_y > 0:
         ball_speed_y *= -1
         block_break = False
+        bounce_sound.play()
 
 
     pygame.display.update()
