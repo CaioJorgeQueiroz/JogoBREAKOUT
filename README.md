@@ -13,4 +13,8 @@ Breakout é um clássico jogo de arcade desenvolvido pela Atari e lançado em 19
 - Refatorar código
 - Consertar Bugs
 - Melhorar jogabilidade
-fernandes
+
+## Participações
+- Caio Jorge da Cunha Queiroz: código do jogo, conceito de mecânicas e refatoração
+- Fernando Alvares Lima Filho: ideias de melhoria no jogo, criação e organização de slides e GDD
+- Caio Pereira: ideias de melhorias e organização de GDD
